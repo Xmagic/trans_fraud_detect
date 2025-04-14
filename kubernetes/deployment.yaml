@@ -41,6 +41,8 @@ spec:
           value: "64"
         - name: SERVER_UNDERTOW_IO_THREADS
           value: "16"
+        - name: aliyun_logs_logstore-fraud-detect
+          value: /app/logs/*.log
         livenessProbe:
           httpGet:
             path: /api/check
