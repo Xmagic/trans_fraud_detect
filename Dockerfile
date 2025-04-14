@@ -1,4 +1,4 @@
-FROM registry.cn-hangzhou.aliyuncs.com/acs/maven:3.6-openjdk-8
+FROM registry.cn-hangzhou.aliyuncs.com/library/openjdk:8-jre-alpine
 
 LABEL maintainer="xmagic1986@163.com"
 
