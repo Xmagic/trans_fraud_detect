@@ -5,7 +5,7 @@ LABEL maintainer="developer@example.com"
 WORKDIR /app
 
 # 添加应用JAR包
-COPY target/fraud-detection-system-*.jar fraud-detection-service.jar
+COPY target/fraud-detection-service.jar fraud-detection-service.jar
 
 # 创建日志目录
 RUN mkdir -p /app/logs

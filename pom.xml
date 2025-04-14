@@ -12,6 +12,7 @@
     <artifactId>fraud-detection-system</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>fraud-detection-system</name>
+    <packaging>jar</packaging>
     <description>Real-Time Fraud Detection System</description>
     
     <properties>
@@ -146,6 +147,7 @@
     </dependencyManagement>
     
     <build>
+        <finalName>fraud-detection-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
