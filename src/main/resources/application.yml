@@ -38,10 +38,6 @@ server:
 # AWS配置
 aws:
   region: eu-north-1
-  # AWS凭证配置 - 实际使用时需要替换为真实的凭证
-#  credentials:
-#    access-key: TEST
-#    secret-key: TEST
 
 # 欺诈检测配置
 fraud-detection:
