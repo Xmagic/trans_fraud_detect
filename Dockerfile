@@ -1,4 +1,4 @@
-FROM registry.cn-hangzhou.aliyuncs.com/library/openjdk:8-jre-alpine
+FROM bishan-acr-hangzhou-registry.cn-hangzhou.cr.aliyuncs.com/yuanjing/ack-java-base:2023-10-release
 
 LABEL maintainer="xmagic1986@163.com"
 
