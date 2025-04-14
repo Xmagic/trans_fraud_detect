@@ -1,0 +1,98 @@
+spring:
+  application:
+    name: fraud-detection-service
+  
+  # 数据库配置
+  datasource:
+    url: jdbc:h2:mem:frauddb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  
+  # 禁用Kafka自动配置
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
+  
+  # Kafka 配置 - 已禁用，只保留配置供参考
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: fraud-detection-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.example.frauddetection.model,com.example.frauddetection.dto"
+
+# 服务器配置
+server:
+  port: 8080
+  undertow:
+    # Docker环境Undertow配置
+    worker-threads: 32
+    io-threads: 8
+    buffer-size: 1024
+    direct-buffers: true
+    accesslog:
+      enabled: true
+      dir: /app/logs
+      pattern: combined
+      prefix: fraud-detection-access.
+      suffix: log
+      rotate: true
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.example.frauddetection: DEBUG
+    io.undertow: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /app/logs/fraud-detection.log
+
+# 应用程序特定配置
+fraud-detection:
+  rules:
+    max-transaction-amount: 10000.00
+    suspicious-countries: "NG,RU,CN,VN"
+    min-account-age-days: 30
+  
+  # 禁用Kafka相关功能
+  kafka:
+    enabled: false 

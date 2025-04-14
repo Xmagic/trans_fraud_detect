@@ -1,0 +1,106 @@
+spring:
+  application:
+    name: fraud-detection-service
+  
+  # 数据库配置 - 使用环境变量配置生产数据库
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  
+  jpa:
+    database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.PostgreSQLDialect}
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  
+  # H2控制台在生产环境禁用
+  h2:
+    console:
+      enabled: false
+  
+  # 是否启用Kafka (可通过环境变量覆盖)
+  autoconfigure:
+    exclude: ${SPRING_AUTOCONFIGURE_EXCLUDE:org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration}
+  
+  # Kafka 配置 - 如果启用的话
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      # 生产环境启用事务支持
+      transaction-id-prefix: fraud-tx-
+      acks: all
+      retries: 3
+    consumer:
+      group-id: fraud-detection-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.example.frauddetection.model,com.example.frauddetection.dto"
+        isolation.level: read_committed
+
+# 服务器配置
+server:
+  port: 8080
+  undertow:
+    # 生产环境Undertow优化配置
+    worker-threads: ${SERVER_UNDERTOW_WORKER_THREADS:200}
+    io-threads: ${SERVER_UNDERTOW_IO_THREADS:32}
+    buffer-size: ${SERVER_UNDERTOW_BUFFER_SIZE:1024}
+    direct-buffers: true
+    # 启用HTTP压缩
+    compression:
+      enabled: true
+      min-response-size: 1024
+    # accesslog配置
+    accesslog:
+      enabled: true
+      dir: /app/logs
+      pattern: combined
+      prefix: fraud-detection-access.
+      suffix: log
+      rotate: true
+
+# 管理端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: when_authorized
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db
+
+# 日志配置 - 使用JSON格式以便于日志聚合
+logging:
+  level:
+    root: WARN
+    com.example.frauddetection: INFO
+    io.undertow: WARN
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%p","thread":"%t","logger":"%logger{36}","message":"%m"}%n'
+  file:
+    name: /app/logs/fraud-detection.log
+
+# 应用程序特定配置
+fraud-detection:
+  rules:
+    # 使用环境变量允许配置更改
+    max-transaction-amount: ${FRAUD_MAX_TRANSACTION_AMOUNT:10000.00}
+    suspicious-countries: ${FRAUD_SUSPICIOUS_COUNTRIES:NG,RU,CN,VN}
+    min-account-age-days: ${FRAUD_MIN_ACCOUNT_AGE_DAYS:30}
+  
+  # 默认禁用Kafka，可通过环境变量启用
+  kafka:
+    enabled: ${FRAUD_DETECTION_KAFKA_ENABLED:false} 

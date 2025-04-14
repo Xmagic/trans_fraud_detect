@@ -1,0 +1,67 @@
+# 基础配置
+spring:
+  application:
+    name: fraud-detection-system
+  # 数据库配置
+  datasource:
+    url: jdbc:h2:mem:frauddb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  # H2配置
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  # JPA配置
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  # JSON配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+# AWS配置
+aws:
+  region: eu-north-1
+  # AWS凭证配置 - 实际使用时需要替换为真实的凭证
+  credentials:
+    access-key: AKIAVZ733KBOP6LL6FHD
+    secret-key: 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
+
+# 欺诈检测配置
+fraud-detection:
+  # AWS SQS配置 fraud-detection.aws.sqs.transaction-queue-url
+  aws:
+    sqs:
+      transaction-queue: transaction-queue
+#      result-queue: fraud-result-queue
+#      alert-queue: fraud-alert-queue
+      transaction-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/transaction-queue.fifo
+#      fraud-alert-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/fraud-alert-queue.fifo
+#      result-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/fraud-result-queue.fifo
+      consumer:
+        threads: 5
+        polling-interval-ms: 1000
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.example.frauddetection: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO 

@@ -1,0 +1,124 @@
+### Java ###
+# 编译后的class文件
+*.class
+
+# 日志文件
+*.log
+logs/
+
+# 包文件
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# 虚拟机崩溃日志
+hs_err_pid*
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+### STS/Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Spring Boot ###
+**/application-local.yml
+**/application-local.properties
+**/application-dev.yml
+**/application-dev.properties
+.env
+
+### 系统文件 ###
+.DS_Store
+Thumbs.db
+
+### H2数据库文件 ###
+*.db
+*.mv.db
+*.trace.db
+
+### Kafka ###
+kafka-streams/
+
+### Docker ###
+docker-compose.override.yml
+
+### Kubernetes ###
+kubeconfig
+*.kubeconfig
+kubectl-config
+.kube/
+
+### 云平台 ###
+# AWS
+.aws/
+aws.json
+terraform.tfstate*
+.terraform/
+
+# GCP
+gcloud/
+*.json.key
+credentials.json
+
+# Alibaba Cloud
+aliyun-cli.conf
+
+### 项目特定 ###
+# Kubernetes本地配置
+kubernetes/secrets/
+kubernetes/local/
+
+# 测试报告和覆盖率报告
+/coverage/
+/reports/
+/jacoco/
+.sonar/
+
+# 生成的文档
+/docs/generated/
+
+# heap dumps
+*.hprof
+
+# 临时文件
+*.tmp
+*.temp
+temp/
+tmp/
+.~lock.*
+~$* 
