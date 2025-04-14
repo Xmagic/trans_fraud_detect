@@ -38,7 +38,9 @@ server:
 # AWS配置
 aws:
   region: eu-north-1
-
+  credentials:
+    access-key: AKIAVZ733KBOP6LL6FHD
+    secret-key: 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
 # 欺诈检测配置
 fraud-detection:
   # AWS SQS配置 fraud-detection.aws.sqs.transaction-queue-url
@@ -53,6 +55,11 @@ fraud-detection:
       consumer:
         threads: 5
         polling-interval-ms: 1000
+  rules:
+    # 测试规则配置
+    max-transaction-amount: 10000.00
+    suspicious-countries: RU,KP,IR,CU,SY
+    min-account-age-days: 7
 
 # 日志配置
 logging:
@@ -60,4 +67,4 @@ logging:
     root: INFO
     com.example.frauddetection: DEBUG
     org.springframework: INFO
-    org.hibernate: INFO 
+    org.hibernate: INFO
