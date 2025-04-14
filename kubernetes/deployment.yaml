@@ -5,7 +5,7 @@ metadata:
   labels:
     app: fraud-detection-service
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: fraud-detection-service
@@ -34,7 +34,7 @@ spec:
             memory: 1Gi
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "prod"
+          value: "test"
         - name: KAFKA_BOOTSTRAP_SERVERS
           value: "kafka-service:9092"
         - name: SERVER_UNDERTOW_WORKER_THREADS
@@ -80,8 +80,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: fraud-detection-service
-  minReplicas: 3
-  maxReplicas: 10
+  minReplicas: 2
+  maxReplicas: 4
   metrics:
   - type: Resource
     resource:
