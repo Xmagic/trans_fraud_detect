@@ -1,4 +1,4 @@
-FROM registry.cn-hangzhou.aliyuncs.com/acs/openjdk8:1.8.0_242
+FROM registry.cn-hangzhou.aliyuncs.com/acs/maven:3.6-openjdk-8
 
 LABEL maintainer="xmagic1986@163.com"
 
