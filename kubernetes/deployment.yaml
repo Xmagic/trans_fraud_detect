@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: fraud-detection-service
-        image: ${DOCKER_REGISTRY}/fraud-detection-service:latest
+        image: ${DOCKER_REGISTRY}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
