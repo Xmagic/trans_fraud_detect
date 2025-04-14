@@ -1,6 +1,6 @@
-FROM openjdk:8-jre-slim
+FROM registry.cn-hangzhou.aliyuncs.com/acs/openjdk8:1.8.0_242
 
-LABEL maintainer="developer@example.com"
+LABEL maintainer="xmagic1986@163.com"
 
 WORKDIR /app
 
