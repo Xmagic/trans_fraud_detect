@@ -13,9 +13,9 @@ import software.amazon.awssdk.services.sqs.model.*;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 使用AWS SDK v2直接从SQS接收消息的消费者
@@ -31,7 +31,7 @@ public class SqsAwsConsumer {
     private final SqsAwsProducer sqsAwsProducer;
     private final String transactionQueueUrl;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final ExecutorService executorService;
+    private final ThreadPoolExecutor executorService;
     private final boolean isFifoQueue;
 
     @Autowired
@@ -41,13 +41,37 @@ public class SqsAwsConsumer {
             FraudDetectionService fraudDetectionService,
             SqsAwsProducer sqsAwsProducer,
             @Value("${fraud-detection.aws.sqs.transaction-queue-url}") String transactionQueueUrl,
-            @Value("${fraud-detection.aws.sqs.consumer.threads:5}") int threadCount) {
+            @Value("${fraud-detection.aws.sqs.consumer.threads:5}") int threadCount,
+            @Value("${fraud-detection.aws.sqs.consumer.queue-size:100}") int queueSize,
+            @Value("${fraud-detection.aws.sqs.consumer.keep-alive-seconds:60}") int keepAliveSeconds) {
         this.sqsClient = sqsClient;
         this.objectMapper = objectMapper;
         this.fraudDetectionService = fraudDetectionService;
         this.sqsAwsProducer = sqsAwsProducer;
         this.transactionQueueUrl = transactionQueueUrl;
-        this.executorService = Executors.newFixedThreadPool(threadCount);
+        
+        // 创建线程池
+        this.executorService = new ThreadPoolExecutor(
+                threadCount, // 核心线程数
+                threadCount, // 最大线程数
+                keepAliveSeconds, // 空闲线程存活时间
+                TimeUnit.SECONDS, // 时间单位
+                new ArrayBlockingQueue<>(queueSize), // 有界队列
+                new ThreadFactory() {
+                    private final AtomicInteger threadNumber = new AtomicInteger(1);
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread thread = new Thread(r, "sqs-consumer-thread-" + threadNumber.getAndIncrement());
+                        thread.setDaemon(true); // 设置为守护线程
+                        return thread;
+                    }
+                },
+                new ThreadPoolExecutor.CallerRunsPolicy() // 拒绝策略：调用者运行
+        );
+        
+        // 允许核心线程超时
+        this.executorService.allowCoreThreadTimeOut(true);
+        
         // 检查队列URL是否以.fifo结尾
         this.isFifoQueue = transactionQueueUrl.endsWith(".fifo");
         log.info("AWS SDK SQS消费者已初始化，使用{}个线程，队列类型: {}", threadCount, isFifoQueue ? "FIFO" : "标准");

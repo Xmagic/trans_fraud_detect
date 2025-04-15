@@ -121,7 +121,7 @@ public class SqsIntegrationLiveTest {
                 fraudDetectionService, 
                 sqsAwsProducer, 
                 queueUrl, 
-                1);
+                1, 100, 60);
         
         // 启动消费者
         sqsAwsConsumer.init();
