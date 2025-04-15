@@ -1,132 +1,165 @@
-# 实时欺诈检测系统
+# 交易欺诈检测系统
 
-这是一个基于Spring Boot的实时欺诈检测系统，可以部署在Kubernetes集群上，用于检测和处理可疑的金融交易。
-
-## 功能特点
-
-- 使用基于规则的机制实时分析交易数据
-- 支持通过REST API直接分析交易
-- 支持通过Kafka消息队列异步处理交易
-- 实现高可用性和弹性扩展
-- 提供完整的日志记录和监控
-
-## 技术栈
-
-- Java 8
-- Spring Boot 2.7.x
-- Spring Data JPA
-- Spring Kafka
-- H2数据库 (开发和测试)
-- JUnit 5 (测试)
-- Docker
-- Kubernetes
+## 项目简介
+基于Spring Boot和AWS SQS的分布式交易欺诈检测系统，提供实时交易监控和欺诈检测功能。
 
 ## 系统架构
-
-系统包含以下主要组件：
-
-1. **REST API** - 接收实时交易分析请求
-2. **Kafka 消费者** - 从消息队列中异步处理交易
-3. **规则引擎** - 应用预定义规则检测欺诈行为
-4. **数据存储** - 存储交易和分析结果
-5. **告警机制** - 检测到欺诈行为时触发告警
-
-## 如何构建
-
-```bash
-./mvnw clean package
+```mermaid
+graph TD
+    A[客户端] -->|HTTP请求| B[API Gateway]
+    B -->|路由| C[交易欺诈检测服务]
+    C -->|发送消息| D[AWS SQS]
+    D -->|消费消息| E[消息消费者]
+    E -->|处理交易| F[欺诈检测引擎]
+    F -->|存储结果| G[数据库]
+    F -->|发送告警| H[告警系统]
+    
+    subgraph 服务内部
+    C -->|生成traceId| I[TraceId拦截器]
+    C -->|记录日志| J[日志系统]
+    E -->|记录日志| J
+    end
 ```
 
-## 本地运行
+## 技术栈
+- Spring Boot 2.7.x
+- AWS SDK for Java
+- AWS SQS
+- SLF4J + Logback
+- Maven
 
-### 前提条件
+## 核心功能
+1. 交易数据接收与处理
+   - REST API接口
+   - AWS SQS消息队列
+   - 异步消息处理
 
-- Java 8+
+2. 欺诈检测
+   - 实时交易监控
+   - 多维度风险分析
+   - 可配置的检测规则
+
+3. 系统监控
+   - 分布式追踪（traceId）
+   - 多维度日志记录
+   - 性能监控
+
+## 日志系统
+系统采用多维度日志记录策略：
+- 系统日志：记录系统运行状态
+- 业务日志：记录业务操作
+- 错误日志：记录异常信息
+- SQS日志：记录消息队列操作
+
+日志格式：
+```
+[时间] [traceId] [requestId/messageId] [线程] 日志级别 日志器 - 消息
+```
+
+## 快速开始
+
+### 环境要求
+- JDK 1.8
 - Maven 3.6+
-- Docker (可选，用于本地Kafka)
+- AWS账号及访问凭证
 
-### 启动Kafka (使用Docker)
-
-```bash
-docker-compose up -d
+### 配置说明
+1. AWS凭证配置
+```yaml
+aws:
+  credentials:
+    access-key: your-access-key
+    secret-key: your-secret-key
+  region: eu-north-1
 ```
 
-### 启动应用程序
-
-```bash
-./mvnw spring-boot:run
+2. SQS配置
+```yaml
+sqs:
+  queue-name: fraud-detection-queue
+  endpoint: https://sqs.eu-north-1.amazonaws.com
 ```
 
-应用程序将在 http://localhost:8080 上运行。
-
-## API 端点
-
-- `POST /api/fraud-detection/analyze` - 实时分析交易
-- `POST /api/fraud-detection/queue` - 将交易排队等待异步分析
-- `GET /api/fraud-detection/transaction/{transactionId}` - 获取特定交易详情
-- `GET /api/fraud-detection/transactions/account/{accountId}` - 获取特定账户的所有交易
-- `GET /api/fraud-detection/transactions/fraudulent` - 获取所有欺诈交易
-
-## Kubernetes部署
-
-### 前提条件
-
-- Kubernetes集群 (如AWS EKS, GCP GKE或Alibaba ACK)
-- kubectl CLI
-
-### 部署步骤
-
-1. 构建并推送Docker镜像到镜像仓库
-
+### 构建与运行
 ```bash
-docker build -t your-registry/fraud-detection-service:latest .
-docker push your-registry/fraud-detection-service:latest
+# 构建项目
+mvn clean package
+
+# 运行服务
+java -jar target/fraud-detection-service.jar
 ```
 
-2. 应用Kubernetes配置
+## API接口
 
-```bash
-kubectl apply -f kubernetes/
+### 交易接口
+- POST /api/transactions
+  - 接收交易数据
+  - 返回交易ID和状态
+
+### 监控接口
+- GET /actuator/health
+  - 服务健康检查
+- GET /actuator/metrics
+  - 性能指标监控
+
+## 部署说明
+系统支持以下部署方式：
+1. 本地运行
+2. Docker容器
+3. Kubernetes集群
+
+### Kubernetes部署
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-detection-service
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+      - name: fraud-detection
+        image: fraud-detection-service:latest
+        ports:
+        - containerPort: 8080
 ```
 
-这将部署以下资源：
-- Deployment
-- Service
-- HorizontalPodAutoscaler
-- ConfigMap
-- Secret (如果需要)
+## 开发规范
+1. 代码风格
+   - 遵循阿里巴巴Java开发手册
+   - 使用Checkstyle进行代码规范检查
 
-## 测试
+2. 日志规范
+   - 使用SLF4J进行日志记录
+   - 遵循日志级别使用规范
+   - 包含必要的上下文信息
 
-### 单元测试
+3. 异常处理
+   - 使用自定义异常类
+   - 合理的异常层级
+   - 完整的异常信息
 
-```bash
-./mvnw test
-```
+## 监控与告警
+1. 性能监控
+   - CPU使用率
+   - 内存使用率
+   - 线程状态
+   - GC情况
 
-### 集成测试
-
-```bash
-./mvnw verify
-```
-
-## 性能指标
-
-系统设计目标：
-- 平均响应时间: <100ms
-- 每秒处理交易数: >1000 TPS
-- 欺诈检测准确率: >95%
+2. 业务监控
+   - 交易处理量
+   - 欺诈检测准确率
+   - 系统响应时间
 
 ## 贡献指南
-
-1. Fork 仓库
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add some amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
+1. Fork项目
+2. 创建特性分支
+3. 提交更改
+4. 推送到分支
 5. 创建Pull Request
 
 ## 许可证
-
 MIT License
 
 ## AWS SQS配置说明
@@ -178,8 +211,6 @@ AWS_REGION=eu-north-1
 
 ```
 transaction-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/transaction-queue.fifo
-fraud-alert-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/fraud-alert-queue.fifo
-result-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/fraud-result-queue.fifo
 ```
 
 请确保这些队列已在AWS SQS控制台中创建，并且您的AWS凭证有权访问它们。 
