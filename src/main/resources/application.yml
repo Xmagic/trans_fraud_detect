@@ -39,8 +39,8 @@ server:
 aws:
   region: eu-north-1
   credentials:
-    access-key: AKIAVZ733KBODOOKXHHG
-    secret-key: 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
+    access-key: test
+    secret-key: test
 # 欺诈检测配置
 fraud-detection:
   # AWS SQS配置 fraud-detection.aws.sqs.transaction-queue-url
