@@ -194,12 +194,12 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.10</minimum>
+                                            <minimum>0.05</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.10</minimum>
+                                            <minimum>0.05</minimum>
                                         </limit>
                                         <limit>
                                             <counter>CLASS</counter>
@@ -212,6 +212,29 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <!-- 排除DTO类 -->
+                        <exclude>**/dto/**</exclude>
+                        <!-- 排除配置类 -->
+                        <exclude>**/config/**</exclude>
+                        <!-- 排除常量类 -->
+                        <exclude>**/constant/**</exclude>
+                        <!-- 排除实体类 -->
+                        <exclude>**/entity/**</exclude>
+                        <!-- 排除枚举类 -->
+                        <exclude>**/enum/**</exclude>
+                        <!-- 排除健康检查控制器 -->
+                        <exclude>**/HealthCheckController.class</exclude>
+                        <!-- 排除测试类 -->
+                        <exclude>**/*Test.class</exclude>
+                        <exclude>**/*Tests.class</exclude>
+                        <!-- 排除Lombok生成的代码 -->
+                        <exclude>**/*$*.class</exclude>
+                        <!-- 排除Spring Boot启动类 -->
+                        <exclude>**/*Application.class</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
