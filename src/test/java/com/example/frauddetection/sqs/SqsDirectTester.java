@@ -1,4 +1,4 @@
-package com.example.frauddetection;
+package com.example.frauddetection.sqs;
 
 import com.example.frauddetection.dto.TransactionRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;

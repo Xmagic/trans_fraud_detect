@@ -47,11 +47,7 @@ fraud-detection:
   aws:
     sqs:
       transaction-queue: transaction-queue
-#      result-queue: fraud-result-queue
-#      alert-queue: fraud-alert-queue
       transaction-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/transaction-queue.fifo
-#      fraud-alert-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/fraud-alert-queue.fifo
-#      result-queue-url: https://sqs.eu-north-1.amazonaws.com/399423262812/fraud-result-queue.fifo
       consumer:
         threads: 5
         polling-interval-ms: 1000
