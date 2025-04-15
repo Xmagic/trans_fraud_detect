@@ -2,7 +2,7 @@
 <configuration>
     <!-- 定义日志文件的存储地址和格式 -->
     <property name="LOG_PATH" value="/app/logs"/>
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %-5level %logger{50} - %msg%n"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}] [%X{requestId}/%X{messageId}] [%thread] %-5level %logger{50} - %msg%n"/>
 
     <!-- 控制台输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

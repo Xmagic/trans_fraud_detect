@@ -4,6 +4,7 @@ import com.example.frauddetection.dto.TransactionRequest;
 import com.example.frauddetection.service.FraudDetectionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.services.sqs.model.*;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -93,6 +95,10 @@ public class SqsAwsConsumer {
         }
 
         try {
+            // 生成消息ID
+            String messageId = UUID.randomUUID().toString();
+            MDC.put("messageId", messageId);
+
             // 构建接收消息请求
             ReceiveMessageRequest.Builder requestBuilder = ReceiveMessageRequest.builder()
                     .queueUrl(transactionQueueUrl)
@@ -120,11 +126,20 @@ public class SqsAwsConsumer {
                             message.attributes().get(MessageSystemAttributeName.SEQUENCE_NUMBER));
                     }
                     
-                    executorService.submit(() -> processMessage(message));
+                    executorService.submit(() -> {
+                        try {
+                            MDC.put("messageId", messageId);
+                            processMessage(message);
+                        } finally {
+                            MDC.remove("messageId");
+                        }
+                    });
                 }
             }
         } catch (Exception e) {
             log.error("从SQS接收消息时发生错误", e);
+        } finally {
+            MDC.remove("messageId");
         }
     }
 

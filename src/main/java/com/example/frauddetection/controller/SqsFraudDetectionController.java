@@ -8,6 +8,7 @@ import com.example.frauddetection.repository.TransactionRepository;
 import com.example.frauddetection.service.FraudDetectionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/fraud-detection")
-@ConditionalOnProperty(name = "fraud-detection.aws.sqs.enabled", havingValue = "true")
+@RequestMapping("/mock")
 public class SqsFraudDetectionController {
 
     private final FraudDetectionService fraudDetectionService;
@@ -77,13 +78,22 @@ public class SqsFraudDetectionController {
         }
 
         try {
+            // 生成请求ID
+            String requestId = UUID.randomUUID().toString();
+            MDC.put("requestId", requestId);
+            
             TransactionRequest request = generateMockTransaction();
+            // 将requestId设置到交易请求中
+            request.setRequestId(requestId);
+            
             sqsAwsProducer.sendTransaction(request);
             log.info("已发送mock交易数据: {}", request.getTransactionId());
         } catch (JsonProcessingException e) {
             log.error("序列化mock交易数据失败", e);
         } catch (Exception e) {
             log.error("发送mock交易数据失败", e);
+        } finally {
+            MDC.remove("requestId");
         }
     }
 
